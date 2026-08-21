@@ -1,0 +1,10 @@
+Create a set of 5 numbers and add a new number using add().
+Given {10, 20, 30, 40}, remove 30 from the set.
+Given {1, 2, 3} and {3, 4, 5}, find their union.
+Given {1, 2, 3, 4} and {3, 4, 5, 6}, find their intersection.
+Given {1, 2, 3, 4} and {3, 4, 5}, find the elements present only in the first set.
+Given {1, 2, 3} and {2, 3, 4}, find the symmetric difference.
+Create a set containing duplicate values and remove all duplicates.
+Given two sets, check whether they have any common elements.
+Create a set and remove all its elements using clear().
+Given {10, 20, 30, 40}, check whether 20 exists in the set.
