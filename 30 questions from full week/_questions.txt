@@ -1,0 +1,42 @@
+Python Practice Questions — 30 Questions
+Topics covered: Basics, Strings, Conditionals, Loops, Lists, Tuples, Sets, Dictionaries, Functions, and Basic Recursion.
+1. Basics & Input/Output
+Take two integers as input and print their sum, difference, product, and division.
+Take a user's name and age as input and print: Hello Rahul, you are 21 years old.
+Take a number as input and check whether it is positive, negative, or zero.
+Take three numbers as input and print the largest number.
+2. Strings
+Take a string as input and count the number of vowels in it.
+Take a string and print it in reverse without using a built-in reverse function.
+Take a string and check whether it is a palindrome.
+Take a sentence and find the longest word in it.
+3. Conditional Statements & Loops
+Print all numbers from 1 to 100 that are divisible by both 3 and 5.
+Take a number n and print its multiplication table from 1 to 10.
+Take a number and find the sum of its digits.
+Take a number and check whether it is a prime number.
+Print the following pattern for n = 5: *, **, ***, ****, ***** (one row per line).
+4. Lists
+Given a list of numbers, find the largest and smallest element without using max() or min().
+Given a list, create a new list containing only the even numbers.
+Given [10, 20, 10, 30, 20, 40, 30], remove the duplicates and create a list containing only unique values.
+Given a list of numbers, find the second-largest element.
+5. Tuples
+Given a tuple of numbers, find the sum, maximum, and minimum values.
+Given the tuple (10, 20, 10, 30, 10, 40, 20), find how many times 10 and 20 occur.
+6. Sets
+Given two sets, find their union, intersection, and difference.
+Given a list of numbers, use a set to find all the duplicate elements.
+Given two sets of student names, find the students who are present in both sets.
+7. Dictionaries
+Given students = {"Rahul": 85, "Priya": 92, "Amit": 78, "Sneha": 95, "Karan": 88}, find the student with the highest marks.
+Given a dictionary containing student names and marks, calculate the average marks.
+Take a sentence as input and create a dictionary containing the frequency of each word. Example: "apple banana apple mango banana apple" → {"apple": 3, "banana": 2, "mango": 1}.
+Given two dictionaries, combine them into a single dictionary.
+8. Functions
+Write a function is_prime(n) that returns True if a number is prime and False otherwise.
+Write a function find_largest(numbers) that takes a list of numbers and returns the largest number without using max().
+9. Basic Recursion
+Write a recursive function to calculate the factorial of a number. Example: Input 5 → Output 120.
+Write a recursive function to find the sum of numbers from 1 to n. Example: Input 5 → Output 15.
+

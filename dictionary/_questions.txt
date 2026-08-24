@@ -1,0 +1,17 @@
+Create a dictionary containing a student's name, age, and marks and print each value.
+Given {"name": "Rahul", "age": 20}, add a new key city.
+Given {"name": "Rahul", "age": 20}, update the age to 21.
+Given {"name": "Rahul", "age": 20, "city": "Hyderabad"}, remove the city key.
+Given a dictionary, check whether a particular key exists.
+Given {"apple": 50, "banana": 30, "mango": 40}, print all the keys.
+Given {"apple": 50, "banana": 30, "mango": 40}, print all the values.
+Given a dictionary, use items() to print every key and value.
+Given {"a": 10, "b": 20, "c": 30}, find the sum of all values.
+Given a dictionary ‘students’ containing student names and marks, find the student who has the highest marks.
+students = {
+    "Rahul": 85,
+    "Priya": 92,
+    "Amit": 78,
+    "Sneha": 95,
+    "Karan": 88
+}
