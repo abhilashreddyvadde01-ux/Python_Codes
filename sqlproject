@@ -1,0 +1,90 @@
+import psycopg
+ 
+connection_string = "postgresql://neondb_owner:npg_gUbKJE7rGF0D@ep-bitter-cherry-a5k7jl82-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+conn = psycopg.connect(connection_string)
+cursor=conn.cursor()
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS students(
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    age FLOAT NOT NULL
+)
+""")
+conn.commit()
+def validate_input(data):
+    parts = data.split()
+ 
+    if len(parts) != 3:
+        return None
+ 
+    id_value, name_value, age_value = parts
+ 
+    try:
+        id_value = int(id_value)
+        if id_value <= 0:
+            return None
+    except:
+        return None
+ 
+    if name_value.isdigit() or not name_value.isalpha():
+        return None
+ 
+    try:
+        age_value = float(age_value)
+        if age_value < 0:
+            return None
+    except:
+        return None
+ 
+    return [id_value, name_value, age_value]
+ 
+ 
+def check_user(ids_list):
+    placeholders = ",".join(["%s"] * len(ids_list))
+    query = f"SELECT id FROM students WHERE id IN ({placeholders})"
+ 
+    cursor.execute(query, ids_list)
+ 
+    return [row[0] for row in cursor.fetchall()]
+ 
+ 
+def add_users(list1, list2, list3):
+    query = "INSERT INTO students(id,name,age) VALUES(%s,%s,%s)"
+ 
+    cursor.execute(query, list1)
+    cursor.execute(query, list2)
+    cursor.execute(query, list3)
+ 
+    conn.commit()
+ 
+ 
+list1 = validate_input(input())
+list2 = validate_input(input())
+list3 = validate_input(input())
+ 
+if not all([list1, list2, list3]):
+    print("Invalid Input")
+    exit()
+ 
+ids_list = [list1[0], list2[0], list3[0]]
+ 
+if len(ids_list) != len(set(ids_list)):
+    print("Duplicate IDs in input")
+    exit()
+ 
+existing_ids = check_user(ids_list)
+ 
+if existing_ids:
+    print("IDs already exist:", existing_ids)
+    exit()
+ 
+add_users(list1, list2, list3)
+ 
+print("All users inserted successfully")
+ 
+cursor.close()
+conn.close()
+ 
+ 
+ 
+ 
