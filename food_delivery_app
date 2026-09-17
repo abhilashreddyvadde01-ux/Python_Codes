@@ -1,0 +1,486 @@
+from abc import ABC, abstractmethod
+ 
+ 
+class Person(ABC):
+    def __init__(self, id, name, email, phone):
+        self.id = id
+        self.name = name
+        self.email = email
+        self.phone = phone
+ 
+    @abstractmethod
+    def get_role(self):
+        pass
+ 
+    @abstractmethod
+    def login(self):
+        pass
+ 
+ 
+class Customer(Person):
+    def __init__(self, id, name, email, phone):
+        super().__init__(id, name, email, phone)
+        self.cart = []
+        self.__balance = 0
+ 
+    def get_role(self):
+        return "Customer"
+ 
+    def login(self):
+        print(self.name, "logged in as Customer")
+ 
+    def add_item(self, item, qty):
+        if item.available:
+            self.cart.append(CartItem(item, qty))
+            print(item.name, "added to cart")
+        else:
+            print(item.name, "is not available")
+ 
+    def get_status(self, order):
+        return order.status
+ 
+    def add_money(self, amount):
+        if amount > 0:
+            self.__balance += amount
+ 
+    def get_balance(self):
+        return self.__balance
+ 
+    def search_shop(self, shops, name, location=None, cuisine=None):
+        result = []
+ 
+        for shop in shops:
+            if name.lower() not in shop.name.lower():
+                continue
+ 
+            if location is not None and location.lower() != shop.location.lower():
+                continue
+ 
+            if cuisine is not None and cuisine.lower() != shop.cuisine.lower():
+                continue
+ 
+            result.append(shop)
+ 
+        return result
+ 
+ 
+class Owner(Person):
+    def __init__(self, id, name, email, phone):
+        super().__init__(id, name, email, phone)
+        self.shop = None
+ 
+    def get_role(self):
+        return "Owner"
+ 
+    def login(self):
+        print(self.name, "logged in as Owner")
+ 
+    def set_shop(self, shop):
+        self.shop = shop
+        shop.owner = self
+ 
+    def add_item(self, item):
+        if self.shop is not None:
+            self.shop.add_item(item)
+ 
+    def remove_item(self, item):
+        if self.shop is not None:
+            self.shop.remove_item(item)
+ 
+    def update_price(self, item, new_price):
+        if self.shop is not None:
+            self.shop.update_price(item, new_price)
+ 
+ 
+class Admin(Person):
+    def get_role(self):
+        return "Admin"
+ 
+    def login(self):
+        print(self.name, "logged in as Admin")
+ 
+    def manage_system(self):
+        print("Admin is managing the system")
+ 
+ 
+class Item:
+    def __init__(self, id, name, price, category, available=True):
+        self.id = id
+        self.name = name
+        self.price = price
+        self.category = category
+        self.available = available
+ 
+    def __str__(self):
+        return f"{self.name} - Rs.{self.price}"
+ 
+ 
+class CartItem:
+    def __init__(self, item, qty):
+        self.item = item
+        self.qty = qty
+ 
+    def get_total(self):
+        return self.item.price * self.qty
+ 
+ 
+class Shop:
+    def __init__(self, id, name, location, cuisine):
+        self.id = id
+        self.name = name
+        self.location = location
+        self.cuisine = cuisine
+        self.menu = []
+        self.owner = None
+ 
+    def add_item(self, item):
+        self.menu.append(item)
+        print(item.name, "added to menu")
+ 
+    def remove_item(self, item):
+        if item in self.menu:
+            self.menu.remove(item)
+            print(item.name, "removed from menu")
+ 
+    def update_price(self, item, new_price):
+        if item in self.menu:
+            item.price = new_price
+            print(item.name, "price updated")
+ 
+    def show_menu(self):
+        print("\nMenu of", self.name)
+ 
+        for item in self.menu:
+            print(item.name, "- Rs.", item.price, "- Available:", item.available)
+ 
+    def set_status(self, order):
+        order.update_status("CONFIRMED")
+        return order.status
+ 
+ 
+class Vehicle(ABC):
+    @abstractmethod
+    def rate_per_km(self):
+        pass
+ 
+ 
+class Bike(Vehicle):
+    def rate_per_km(self):
+        return 10
+ 
+ 
+class Scooter(Vehicle):
+    def rate_per_km(self):
+        return 12
+ 
+ 
+class Cycle(Vehicle):
+    def rate_per_km(self):
+        return 7
+ 
+ 
+class Rider(Person):
+    def __init__(self, id, name, email, phone, vehicle):
+        super().__init__(id, name, email, phone)
+        self.vehicle = vehicle
+        self.available = True
+        self.current_order = None
+ 
+    def get_role(self):
+        return "Rider"
+ 
+    def login(self):
+        print(self.name, "logged in as Rider")
+ 
+    def accept_order(self, order):
+        if self.available:
+            self.current_order = order
+            self.available = False
+            order.rider = self
+            order.update_status("OUT_FOR_DELIVERY")
+            return "Order accepted by " + self.name
+ 
+        return "Rider is not available"
+ 
+    def delivery_charge(self, distance):
+        return distance * self.vehicle.rate_per_km()
+ 
+    def set_status(self, order):
+        order.update_status("DELIVERED")
+        self.current_order = None
+        self.available = True
+        return f"{self.name} has delivered the order"
+ 
+ 
+class Order:
+    def __init__(self, id, customer, shop, items, rider=None, distance=0, discount=None):
+        self.id = id
+        self.customer = customer
+        self.shop = shop
+        self.items = items
+        self.rider = rider
+        self.__status = "PLACED"
+        self.distance = distance
+ 
+        self.subtotal = self.get_subtotal()
+ 
+        if discount is not None:
+            self.discount = discount.apply(self.subtotal)
+        else:
+            self.discount = 0
+ 
+        if rider is not None:
+            self.delivery_charge = rider.delivery_charge(distance)
+        else:
+            self.delivery_charge = 0
+ 
+        self.tax_rate = 0.05
+ 
+        taxable = self.subtotal - self.discount + self.delivery_charge
+ 
+        self.tax = taxable * self.tax_rate
+        self.__total = taxable + self.tax
+ 
+    @property
+    def status(self):
+        return self.__status
+ 
+    def update_status(self, new_status):
+        valid = [
+            "PLACED", "CONFIRMED", "PREPARING",
+            "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED",
+        ]
+ 
+        if new_status not in valid:
+            return
+ 
+        self.__status = new_status
+        notifier = PushNotification()
+ 
+        messages = {
+            "CONFIRMED": f"Your order #{self.id} has been confirmed!",
+            "PREPARING": f"Your order #{self.id} is being prepared.",
+            "OUT_FOR_DELIVERY": f"Your order #{self.id} is out for delivery.",
+            "DELIVERED": f"Your order #{self.id} has been delivered!",
+            "CANCELLED": f"Your order #{self.id} has been cancelled.",
+        }
+ 
+        if new_status in messages:
+            notifier.send(messages[new_status])
+ 
+    @property
+    def total(self):
+        return self.__total
+ 
+    def get_subtotal(self):
+        return sum(item.get_total() for item in self.items)
+ 
+    def get_status(self):
+        return self.status
+ 
+    def get_final_price(self):
+        return self.total
+ 
+ 
+class Discount(ABC):
+    @abstractmethod
+    def apply(self, amount):
+        pass
+ 
+ 
+class PercentageDiscount(Discount):
+    def __init__(self, percent):
+        self.percent = percent
+ 
+    def apply(self, amount):
+        return amount * self.percent / 100
+ 
+ 
+class FlatDiscount(Discount):
+    def __init__(self, amount):
+        self.amount = amount
+ 
+    def apply(self, amount):
+        return min(self.amount, amount)
+ 
+ 
+class NoDiscount(Discount):
+    def apply(self, amount):
+        return 0
+ 
+ 
+class Payment(ABC):
+    def __init__(self, order):
+        self.order = order
+        self.status = "PENDING"
+ 
+    def get_price(self):
+        return self.order.total
+ 
+    def get_status(self):
+        return self.status
+ 
+    @abstractmethod
+    def pay(self):
+        pass
+ 
+    @abstractmethod
+    def refund(self):
+        pass
+ 
+ 
+class UPIPayment(Payment):
+    def pay(self):
+        print("Processing UPI payment...")
+        self.status = "SUCCESS"
+        print("UPI payment successful")
+ 
+    def refund(self):
+        self.status = "REFUNDED"
+        print("UPI payment refunded")
+ 
+ 
+class CardPayment(Payment):
+    def pay(self):
+        print("Processing Card payment...")
+        self.status = "SUCCESS"
+        print("Card payment successful")
+ 
+    def refund(self):
+        self.status = "REFUNDED"
+        print("Card payment refunded")
+ 
+ 
+class CashOnDelivery(Payment):
+    def pay(self):
+        self.status = "PENDING"
+        print("Cash on Delivery selected")
+        print("Payment will be collected during delivery")
+ 
+    def refund(self):
+        self.status = "REFUNDED"
+        print("Cash payment refunded")
+ 
+ 
+class Notification(ABC):
+    @abstractmethod
+    def send(self, message):
+        pass
+ 
+ 
+class EmailNotification(Notification):
+    def send(self, message):
+        print("EMAIL:", message)
+ 
+ 
+class SMSNotification(Notification):
+    def send(self, message):
+        print("SMS:", message)
+ 
+ 
+class PushNotification(Notification):
+    def send(self, message):
+        print("PUSH:", message)
+ 
+ 
+# ---- Sample data ----
+ 
+pizza = Item(101, "Pizza", 89, "Fast Food")
+burger = Item(102, "Burger", 70, "Fast Food")
+shawarma = Item(103, "Shawarma", 79, "Fast Food")
+nahari = Item(104, "Nahari", 129, "Indian")
+ 
+shop1 = Shop(1, "Shahgouse", "Hyderabad", "Indian")
+shop2 = Shop(2, "Pista House", "Hyderabad", "Indian")
+ 
+shop1.add_item(pizza)
+shop1.add_item(burger)
+ 
+shop2.add_item(nahari)
+shop2.add_item(shawarma)
+ 
+customer1 = Customer(1, "Abhilash Reddy", "abhilashreddy@gmail.com", "8341123283")
+owner1 = Owner(2, "Shah Gouse Owner", "owner@gmail.com", "9876543211")
+admin1 = Admin(3, "Admin", "admin@gmail.com", "9876543212")
+ 
+owner1.set_shop(shop1)
+ 
+rider1 = Rider(555, "Mohani", "mohani@gmail.com", "9576543213", Bike())
+ 
+print("\n===== FOOD DELIVERY SYSTEM =====")
+ 
+print("\n===== LOGIN =====")
+ 
+customer1.login()
+owner1.login()
+rider1.login()
+admin1.login()
+ 
+print("\n===== SHOP MENU =====")
+ 
+shop1.show_menu()
+ 
+print("\n===== ADD TO CART =====")
+ 
+customer1.add_item(pizza, 3)
+customer1.add_item(burger, 4)
+ 
+discount = FlatDiscount(100)
+ 
+order1 = Order(1001, customer1, shop1, customer1.cart, rider1, distance=5, discount=discount)
+ 
+print("\n===== ORDER DETAILS =====")
+ 
+print("Order ID:", order1.id)
+print("Customer:", customer1.name)
+print("Shop:", shop1.name)
+print("Order Status:", order1.status)
+print("Subtotal:", order1.subtotal)
+print("Discount:", order1.discount)
+print("Delivery Charge:", order1.delivery_charge)
+print("Tax:", order1.tax)
+print("Final Amount:", order1.total)
+ 
+print("\n===== SHOP =====")
+ 
+print("Shop Status:", shop1.set_status(order1))
+ 
+order1.update_status("PREPARING")
+ 
+print("Order Status:", order1.status)
+ 
+print("\n===== PAYMENT =====")
+ 
+payment1 = UPIPayment(order1)
+ 
+print("Payment Method: UPI")
+print("Amount to Pay:", payment1.get_price())
+ 
+payment1.pay()
+ 
+print("Payment Status:", payment1.get_status())
+ 
+print("\n===== DELIVERY =====")
+ 
+print(rider1.accept_order(order1))
+ 
+print("Order Status:", order1.status)
+ 
+print("\n===== DELIVERY COMPLETED =====")
+ 
+print("Delivery Status:", rider1.set_status(order1))
+ 
+print("Final Order Status:", order1.get_status())
+ 
+print("\n===== ADMIN =====")
+ 
+admin1.manage_system()
+ 
+print("\n===== SHOP SEARCH =====")
+ 
+shops = [shop1, shop2]
+ 
+result = customer1.search_shop(shops, "House", "Hyderabad", "Indian")
+ 
+for shop in result:
+    print(shop.name, "-", shop.location, "-", shop.cuisine)
